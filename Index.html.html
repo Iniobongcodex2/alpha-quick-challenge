@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ALPHA Quick Challenge</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  :root {
+    --navy: #0D1B3E;
+    --gold: #D4AF37;
+    --light-blue: #4DA6FF;
+    --dark-red: #8B1A1A;
+    --white: #FFFFFF;
+    --gray: #8A8F98;
+    --gray-light: #E8EAED;
+  }
+  html, body {
+    height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--navy);
+    color: var(--white);
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  #app {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px;
+    overflow-y: auto;
+  }
+  .screen { display: none; flex: 1; flex-direction: column; }
+  .screen.active { display: flex; }
+
+  /* Start screen */
+  .logo {
+    font-size: 42px;
+    font-weight: 900;
+    letter-spacing: 4px;
+    color: var(--white);
+    text-align: center;
+    margin-top: 8vh;
+    line-height: 1.1;
+  }
+  .logo span { color: var(--gold); }
+  .subtitle {
+    text-align: center;
+    color: var(--gray);
+    margin-top: 8px;
+    font-size: 14px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .tagline {
+    text-align: center;
+    margin-top: 30px;
+    font-size: 15px;
+    color: var(--gray-light);
+    line-height: 1.5;
+    padding: 0 20px;
+  }
+  .high-score-start {
+    text-align: center;
+    color: var(--gold);
+    font-size: 14px;
+    margin-top: 20px;
+    letter-spacing: 1px;
+  }
+  .menu-buttons {
+    margin-top: auto;
+    margin-bottom: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .start-btn {
+    padding: 22px;
+    background: var(--gold);
+    color: var(--navy);
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    text-transform: uppercase;
+  }
+  .start-btn:active { transform: scale(0.98); }
+  .how-btn {
+    padding: 16px;
+    background: transparent;
+    color: var(--white);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    border: 2px solid rgba(255,255,255,0.2);
+    border-radius: 14px;
+    cursor: pointer;
+    text-transform: uppercase;
+  }
+
+  /* How to play screen */
+  .how-title {
+    font-size: 30px;
+    font-weight: 900;
+    color: var(--gold);
+    text-align: center;
+    margin-top: 4vh;
+    letter-spacing: 2px;
+  }
+  .how-sub {
+    text-align: center;
+    color: var(--gray);
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+  .how-content {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+  .how-step {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 18px;
+    align-items: flex-start;
+  }
+  .how-num {
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--gold);
+    color: var(--navy);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 15px;
+  }
+  .how-text {
+    flex: 1;
+    font-size: 15px;
+    color: var(--gray-light);
+    line-height: 1.5;
+    padding-top: 4px;
+  }
+  .how-text strong { color: var(--white); }
+  .how-box {
+    background: rgba(255,255,255,0.05);
+    border-left: 3px solid var(--gold);
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin: 20px 0;
+    font-size: 14px;
+    color: var(--gray-light);
+    line-height: 1.5;
+  }
+  .how-box strong { color: var(--gold); }
+
+  /* Difficulty screen */
+  .diff-title {
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--gold);
+    text-align: center;
+    margin-top: 6vh;
+    letter-spacing: 2px;
+  }
+  .diff-sub {
+    text-align: center;
+    color: var(--gray-light);
+    font-size: 14px;
+    margin-top: 8px;
+    margin-bottom: 30px;
+  }
+  .diff-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .diff-btn {
+    padding: 20px;
+    background: rgba(255,255,255,0.06);
+    border: 2px solid rgba(255,255,255,0.15);
+    border-radius: 14px;
+    cursor: pointer;
+    color: var(--white);
+    text-align: left;
+    font-family: inherit;
+  }
+  .diff-btn:active { transform: scale(0.98); }
+  .diff-btn .diff-name {
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+  .diff-btn .diff-desc {
+    font-size: 13px;
+    color: var(--gray);
+  }
+  .diff-btn.easy .diff-name { color: #27AE60; }
+  .diff-btn.normal .diff-name { color: var(--gold); }
+  .diff-btn.hard .diff-name { color: #E67E22; }
+
+  /* Game screen */
+  .hud {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .hud-item { text-align: center; }
+  .hud-label {
+    font-size: 10px;
+    color: var(--gray);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+  .hud-value {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--white);
+  }
+  .hud-value.time-low { color: var(--dark-red); }
+  .hud-value.score-val { color: var(--gold); }
+
+  .timer-bar {
+    height: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 30px;
+  }
+  .timer-fill {
+    height: 100%;
+    background: var(--gold);
+    width: 100%;
+    transition: width 1s linear;
+  }
+  .timer-fill.low { background: var(--dark-red); }
+
+  .question-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 18px;
+    padding: 30px 20px;
+    text-align: center;
+    margin-bottom: 24px;
+  }
+  .question-label {
+    font-size: 11px;
+    color: var(--gray);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .question-text {
+    font-size: 40px;
+    font-weight: 800;
+    color: var(--white);
+    line-height: 1.2;
+  }
+
+  .answers {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .answer-btn {
+    padding: 24px 12px;
+    background: rgba(255,255,255,0.08);
+    border: 2px solid rgba(255,255,255,0.15);
+    border-radius: 14px;
+    color: var(--white);
+    font-size: 26px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .answer-btn:active { transform: scale(0.97); }
+  .answer-btn.correct {
+    background: #1E8449;
+    border-color: #27AE60;
+  }
+  .answer-btn.wrong {
+    background: var(--dark-red);
+    border-color: #C0392B;
+  }
+
+  /* Game over screen */
+  .gameover-title {
+    font-size: 36px;
+    font-weight: 900;
+    color: var(--gold);
+    text-align: center;
+    margin-top: 6vh;
+    letter-spacing: 2px;
+  }
+  .final-score {
+    text-align: center;
+    font-size: 96px;
+    font-weight: 900;
+    color: var(--white);
+    margin: 20px 0;
+    line-height: 1;
+  }
+  .final-score-label {
+    text-align: center;
+    color: var(--gray);
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .result-stats {
+    background: rgba(255,255,255,0.05);
+    border-radius: 14px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+  }
+  .result-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 14px;
+  }
+  .result-row .label { color: var(--gray); }
+  .result-row .value { color: var(--white); font-weight: 700; }
+  .result-row .value.gold { color: var(--gold); }
+  .btn-primary {
+    padding: 20px;
+    background: var(--gold);
+    color: var(--navy);
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    font-family: inherit;
+    width: 100%;
+  }
+  .btn-secondary {
+    padding: 18px;
+    background: transparent;
+    color: var(--white);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    border: 2px solid rgba(255,255,255,0.2);
+    border-radius: 12px;
+    cursor: pointer;
+    text-transform: uppercase;
+    font-family: inherit;
+    width: 100%;
+  }
+  .btn-primary:active, .btn-secondary:active { transform: scale(0.98); }
+  .btn-whatsapp {
+    padding: 18px;
+    background: #25D366;
+    color: #FFFFFF;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+  }
+  .btn-whatsapp:active { transform: scale(0.98); }
+  .gameover-actions {
+    margin-top: auto;
+    margin-bottom: 24px;
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- Start screen -->
+  <div class="screen active" id="startScreen">
+    <div class="logo">ALPHA <span>QUICK</span><br>CHALLENGE</div>
+    <div class="subtitle">60 seconds · one brain</div>
+    <div class="tagline">Fast brain puzzles. Beat your best score. Share with friends.</div>
+    <div class="high-score-start" id="highScoreStart"></div>
+    <div class="menu-buttons">
+      <button class="start-btn" onclick="showDifficulty()">Start Challenge</button>
+      <button class="how-btn" onclick="showHowTo()">How to Play</button>
+    </div>
+  </div>
+
+  <!-- How to Play screen -->
+  <div class="screen" id="howScreen">
+    <div class="how-title">HOW TO PLAY</div>
+    <div class="how-sub">Read this first — takes 30 seconds</div>
+    <div class="how-content">
+      <div class="how-step">
+        <div class="how-num">1</div>
+        <div class="how-text">You'll see a <strong>puzzle</strong> like <strong>7 + 5</strong> or <strong>2, 4, 6, ?</strong></div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">2</div>
+        <div class="how-text">Tap the <strong>correct answer</strong> from four options below the puzzle.</div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">3</div>
+        <div class="how-text"><strong>+1 point</strong> for each correct answer. The faster you answer, the more you can solve.</div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">4</div>
+        <div class="how-text">Wrong answers <strong>cost 3 seconds</strong>. Think carefully, but don't freeze.</div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">5</div>
+        <div class="how-text">Puzzles get <strong>harder as you score</strong>. When time runs out, your score is final.</div>
+      </div>
+      <div class="how-box">
+        <strong>Tip:</strong> You'll get 4 answer choices. Only one is correct. Guess if you have to — a wrong guess costs 3 seconds, but leaving time on the clock earns nothing.
+      </div>
+    </div>
+    <div class="gameover-actions">
+      <button class="btn-primary" onclick="showDifficulty()">Got It — Start</button>
+      <button class="btn-secondary" onclick="showStart()">Back</button>
+    </div>
+  </div>
+
+  <!-- Difficulty screen -->
+  <div class="screen" id="diffScreen">
+    <div class="diff-title">CHOOSE YOUR TIME</div>
+    <div class="diff-sub">More time = harder to focus. Less time = faster score.</div>
+    <div class="diff-options">
+      <button class="diff-btn easy" onclick="startGame(30)">
+        <div class="diff-name">⚡ QUICK — 30 seconds</div>
+        <div class="diff-desc">For speed demons. Prove your reflexes.</div>
+      </button>
+      <button class="diff-btn normal" onclick="startGame(60)">
+        <div class="diff-name">🎯 CLASSIC — 60 seconds</div>
+        <div class="diff-desc">The standard challenge. Balanced and fair.</div>
+      </button>
+      <button class="diff-btn hard" onclick="startGame(120)">
+        <div class="diff-name">🧠 MARATHON — 120 seconds</div>
+        <div class="diff-desc">For deep thinkers. How far can you go?</div>
+      </button>
+    </div>
+    <div class="gameover-actions">
+      <button class="btn-secondary" onclick="showStart()">Back to Menu</button>
+    </div>
+  </div>
+
+  <!-- Game screen -->
+  <div class="screen" id="gameScreen">
+    <div class="hud">
+      <div class="hud-item">
+        <div class="hud-label">Score</div>
+        <div class="hud-value score-val" id="scoreVal">0</div>
+      </div>
+      <div class="hud-item">
+        <div class="hud-label">Time</div>
+        <div class="hud-value" id="timeVal">60</div>
+      </div>
+      <div class="hud-item">
+        <div class="hud-label">Streak</div>
+        <div class="hud-value" id="streakVal">0</div>
+      </div>
+    </div>
+    <div class="timer-bar"><div class="timer-fill" id="timerFill"></div></div>
+    <div class="question-card">
+      <div class="question-label" id="questionLabel">Solve</div>
+      <div class="question-text" id="questionText">7 + 5</div>
+    </div>
+    <div class="answers" id="answers"></div>
+  </div>
+
+  <!-- Game over screen -->
+  <div class="screen" id="gameoverScreen">
+    <div class="gameover-title">TIME'S UP</div>
+    <div class="final-score" id="finalScore">0</div>
+    <div class="final-score-label">Final Score</div>
+    <div class="result-stats">
+      <div class="result-row"><span class="label">Correct answers</span><span class="value" id="correctCount">0</span></div>
+      <div class="result-row"><span class="label">Wrong answers</span><span class="value" id="wrongCount">0</span></div>
+      <div class="result-row"><span class="label">Best streak</span><span class="value" id="bestStreakCount">0</span></div>
+      <div class="result-row"><span class="label">Personal best</span><span class="value gold" id="personalBest">0</span></div>
+    </div>
+    <div class="gameover-actions">
+      <button class="btn-whatsapp" onclick="shareWhatsApp()">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+        </svg>
+        Share on WhatsApp
+      </button>
+      <button class="btn-primary" onclick="showDifficulty()">Play Again</button>
+      <button class="btn-secondary" onclick="showStart()">Main Menu</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ===================== GAME STATE =====================
+const state = {
+  score: 0,
+  timeLeft: 60,
+  totalTime: 60,
+  streak: 0,
+  bestStreak: 0,
+  correct: 0,
+  wrong: 0,
+  currentAnswer: null,
+  timerId: null,
+  accepting: false,
+};
+
+const WRONG_PENALTY = 3;
+
+// ===================== QUESTION GENERATORS =====================
+function randInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function difficulty() {
+  const s = state.score;
+  if (s < 5) return 1;
+  if (s < 15) return 2;
+  if (s < 30) return 3;
+  return 4;
+}
+
+function genMath() {
+  const d = difficulty();
+  const max = [9, 20, 50, 100][d - 1];
+  const a = randInt(1, max);
+  const b = randInt(1, max);
+  const op = Math.random() < 0.5 ? '+' : '-';
+  let correct, text;
+  if (op === '+') {
+    correct = a + b;
+    text = `${a} + ${b}`;
+  } else {
+    const hi = Math.max(a, b), lo = Math.min(a, b);
+    correct = hi - lo;
+    text = `${hi} − ${lo}`;
+  }
+  return { label: 'Math', text, answer: correct };
+}
+
+function genSequence() {
+  const d = difficulty();
+  const start = randInt(1, [5, 10, 20, 30][d - 1]);
+  const step = randInt(2, [4, 6, 9, 12][d - 1]);
+  const seq = [start, start + step, start + 2 * step, start + 3 * step];
+  const answer = start + 4 * step;
+  return { label: 'What comes next?', text: seq.join(', ') + ', ?', answer };
+}
+
+function genMissing() {
+  const d = difficulty();
+  const max = [10, 20, 40, 80][d - 1];
+  const a = randInt(2, max);
+  const b = randInt(2, max);
+  const sum = a + b;
+  return { label: 'Solve', text: `? + ${a} = ${sum}`, answer: b };
+}
+
+function genMultiply() {
+  const d = difficulty();
+  const max = [5, 8, 10, 12][d - 1];
+  const a = randInt(2, max);
+  const b = randInt(2, max);
+  return { label: 'Multiply', text: `${a} × ${b}`, answer: a * b };
+}
+
+const GENERATORS = [genMath, genMath, genSequence, genMissing, genMultiply];
+
+function newQuestion() {
+  const gen = GENERATORS[randInt(0, GENERATORS.length - 1)];
+  const q = gen();
+  const options = new Set([q.answer]);
+  while (options.size < 4) {
+    const offset = randInt(1, 10) * (Math.random() < 0.5 ? -1 : 1);
+    const candidate = q.answer + offset;
+    if (candidate >= 0 && candidate !== q.answer) options.add(candidate);
+  }
+  const optionsArr = shuffle([...options]);
+  return { ...q, options: optionsArr };
+}
+
+// ===================== UI HELPERS =====================
+function $(id) { return document.getElementById(id); }
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $(id).classList.add('active');
+}
+
+// ===================== NAVIGATION =====================
+function showStart() {
+  updateHighScoreStart();
+  showScreen('startScreen');
+}
+
+function showHowTo() {
+  showScreen('howScreen');
+}
+
+function showDifficulty() {
+  showScreen('diffScreen');
+}
+
+// ===================== GAME FLOW =====================
+function startGame(duration) {
+  state.score = 0;
+  state.timeLeft = duration;
+  state.totalTime = duration;
+  state.streak = 0;
+  state.bestStreak = 0;
+  state.correct = 0;
+  state.wrong = 0;
+  state.accepting = false;
+
+  updateHUD();
+  showScreen('gameScreen');
+  nextQuestion();
+
+  clearInterval(state.timerId);
+  state.timerId = setInterval(tick, 1000);
+}
+
+function tick() {
+  state.timeLeft--;
+  if (state.timeLeft <= 0) {
+    state.timeLeft = 0;
+    updateHUD();
+    endGame();
+    return;
+  }
+  updateHUD();
+}
+
+function updateHUD() {
+  $('scoreVal').textContent = state.score;
+  $('timeVal').textContent = state.timeLeft;
+  $('streakVal').textContent = state.streak;
+
+  const timeEl = $('timeVal');
+  const fillEl = $('timerFill');
+  const low = state.timeLeft <= state.totalTime * 0.25;
+  timeEl.classList.toggle('time-low', low);
+  fillEl.classList.toggle('low', low);
+  fillEl.style.width = (state.timeLeft / state.totalTime * 100) + '%';
+}
+
+function nextQuestion() {
+  const q = newQuestion();
+  state.currentAnswer = q.answer;
+  state.accepting = true;
+
+  $('questionLabel').textContent = q.label;
+  $('questionText').textContent = q.text;
+
+  const answersEl = $('answers');
+  answersEl.innerHTML = '';
+  q.options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'answer-btn';
+    btn.textContent = opt;
+    btn.onclick = () => handleAnswer(opt, btn);
+    answersEl.appendChild(btn);
+  });
+}
+
+function handleAnswer(value, btn) {
+  if (!state.accepting) return;
+  state.accepting = false;
+
+  const isCorrect = value === state.currentAnswer;
+
+  if (isCorrect) {
+    state.score++;
+    state.correct++;
+    state.streak++;
+    if (state.streak > state.bestStreak) state.bestStreak = state.streak;
+    btn.classList.add('correct');
+  } else {
+    state.wrong++;
+    state.streak = 0;
+    state.timeLeft = Math.max(0, state.timeLeft - WRONG_PENALTY);
+    btn.classList.add('wrong');
+    document.querySelectorAll('.answer-btn').forEach(b => {
+      if (parseInt(b.textContent) === state.currentAnswer) {
+        b.classList.add('correct');
+      }
+    });
+  }
+
+  updateHUD();
+
+  setTimeout(() => {
+    if (state.timeLeft <= 0) {
+      endGame();
+    } else {
+      nextQuestion();
+    }
+  }, isCorrect ? 250 : 700);
+}
+
+function endGame() {
+  clearInterval(state.timerId);
+  state.accepting = false;
+
+  const currentBest = parseInt(localStorage.getItem('alphaQuickBest') || '0');
+  const newBest = Math.max(currentBest, state.score);
+  localStorage.setItem('alphaQuickBest', newBest);
+
+  $('finalScore').textContent = state.score;
+  $('correctCount').textContent = state.correct;
+  $('wrongCount').textContent = state.wrong;
+  $('bestStreakCount').textContent = state.bestStreak;
+  $('personalBest').textContent = newBest;
+
+  showScreen('gameoverScreen');
+  updateHighScoreStart();
+}
+
+function updateHighScoreStart() {
+  const best = parseInt(localStorage.getItem('alphaQuickBest') || '0');
+  const el = $('highScoreStart');
+  el.textContent = best > 0 ? `Personal Best: ${best}` : '';
+}
+
+// ===================== SHARE =====================
+const GAME_URL = "";
+
+function getGameUrl() {
+  if (GAME_URL) return GAME_URL;
+  return window.location.href;
+}
+
+function shareWhatsApp() {
+  const best = parseInt(localStorage.getItem('alphaQuickBest') || '0');
+  const isNewBest = state.score > 0 && state.score >= best;
+
+  let scoreLine;
+  if (isNewBest) {
+    scoreLine = `🏆 I just set a NEW PERSONAL BEST of *${state.score}* in ALPHA Quick Challenge!`;
+  } else {
+    scoreLine = `🎯 I scored *${state.score}* in ALPHA Quick Challenge!`;
+  }
+
+  const url = getGameUrl();
+  const message =
+    `${scoreLine}\n\n` +
+    `⚡ Brain puzzles. Beat my score?\n\n` +
+    `👉 Play here: ${url}`;
+
+  const waUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+  window.open(waUrl, '_blank');
+}
+
+// ===================== INIT =====================
+updateHighScoreStart();
+</script>
+</body>
+</html>
